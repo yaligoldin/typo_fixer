@@ -27,6 +27,8 @@ class FileFetcher:
     RAW = "raw"
     TWO_LAST_PARTS = -2
     RECURSIVE = "recursive=True"
+    MODE = "mode"
+    FILE_TYPE = '100644'
 
     def __init__(self, repository_path: str, git_path: str):
         self.repository_path: str = repository_path
@@ -44,8 +46,9 @@ class FileFetcher:
     def _get_files_content(self, response: Dict, project_path: str):
         files: List[File] = []
         for file in response:
-            file_content = self._get_file_content(project_path, file[self.PATH])
-            files.append(File(file[self.NAME], file_content))
+            if file[self.MODE] == self.FILE_TYPE:
+                file_content = self._get_file_content(project_path, file[self.PATH])
+                files.append(File(file[self.NAME], file_content))
         return files
 
     def fetch_files(self) -> Optional[List[File]]:
