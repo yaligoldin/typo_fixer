@@ -1,3 +1,6 @@
+"""
+python file typo finder
+"""
 import io
 import re
 import string
@@ -16,58 +19,56 @@ class PythonTypoFinder(BaseTypoFinder):
     DOCSTRING_LEN = 3
     EQUAL = "="
     CONTENT = 0
+    COMMENT_SIGN = 1
 
     def __init__(self, file_name: str, file_content: str):
         self.file_name = file_name
         self.file_content = file_content
         self.typos: List[Tuple[str, int]] = []
         self.special_python_function = ["__init__", "__str__", "__repr__", "__call__", "def"]
+        self.split_ways = [self._split_dander, self._split_caml_case]
 
-    def is_docstring(self, last_token: str, token: tokenize.TokenInfo) -> bool:
-        if token.string[:self.DOCSTRING_LEN] == f"{self.QUOTATION}{self.QUOTATION}{self.QUOTATION}" \
-                and token.string[-self.DOCSTRING_LEN:] == f"{self.QUOTATION}{self.QUOTATION}{self.QUOTATION}" \
-                and last_token != self.EQUAL:
-            return True
-        return token.string[:self.DOCSTRING_LEN] == f"{self.APOSTROPHE}{self.APOSTROPHE}{self.APOSTROPHE}" \
-            and token.string[-self.DOCSTRING_LEN:] == f"{self.APOSTROPHE}{self.APOSTROPHE}{self.APOSTROPHE}" \
-            and last_token != self.EQUAL
+    @staticmethod
+    def _split_dander(statement_to_split: str):
+        return statement_to_split.split("_")
+
+    @staticmethod
+    def _split_caml_case(statement_to_split: str):
+        return re.findall(r"[A-Z][a-z]*", statement_to_split)
+
+    def is_docstring(self, last_token: str, token: tokenize.TokenInfo, quotation_sign: str) -> bool:
+        return token.string[:self.DOCSTRING_LEN] == f"{quotation_sign}{quotation_sign}{quotation_sign}" \
+               and token.string[-self.DOCSTRING_LEN:] == f"{quotation_sign}{quotation_sign}{quotation_sign}" \
+               and last_token != self.EQUAL
 
     def is_comment(self, last_token: str, token: tokenize.TokenInfo) -> bool:
         if token.type == tokenize.COMMENT:
             return True
-        return self.is_docstring(last_token, token)
+        return self.is_docstring(last_token, token, self.QUOTATION) or self.is_docstring(last_token, token,
+                                                                                         self.APOSTROPHE)
 
-    def _scan_content(self) -> Tuple[List[Tuple[str, int]], Set[Tuple[str, int]]]:
-        comments: List[Tuple[str, int]] = []
+    def _scan_content(self) -> Set[Tuple[str, int]]:
         tokens = tokenize.generate_tokens(io.StringIO(self.file_content).readline)
         last_token = ""
-        names: Set[Tuple[str, int]] = set()
+        statements: Set[Tuple[str, int]] = set()
         for token in tokens:
             if self.is_comment(last_token, token):
-                comments.append((token.string[1:], token.start[self.LINE]))
+                statements.add((token.string[self.COMMENT_SIGN:], token.start[self.LINE]))
             last_token = token.string
             if token.type == tokenize.NAME:
-                names.add((token.string, token.start[self.LINE]))
-        return comments, names
-
-    def _check_comments_typo(self, comments: List[Tuple[str, int]]):
-        for comment in comments:
-            comments_words = comment[self.COMMENT].split(" ")
-            self._check_typo_word(comments_words, comment[self.LINE_NUMBER])
+                statements.add((token.string, token.start[self.LINE]))
+        return statements
 
     def _check_statement_typo(self, code_statements: Set[Tuple[str, int]]):
         for statement in code_statements:
             self._check_statement(statement[self.CONTENT], statement[self.LINE_NUMBER])
 
-    @staticmethod
-    def _split_statement_to_words(statement_to_check: str):
-        statement_words = statement_to_check.split("_")
-        if len(statement_words) > 1:
-            return statement_words
-        statement_words = re.findall(r"[A-Z][a-z]*", statement_to_check)
-        if len(statement_words) > 1:
-            return statement_words
-        return [statement_to_check]
+    def _split_statement_to_words(self, statement_to_check: str):
+        for split_way in self.split_ways:
+            statement_words = split_way(statement_to_check)
+            if len(statement_words) > 1:
+                return statement_words
+        return statement_to_check.split(" ")
 
     def _check_statement(self, statement_to_check: str, line_number: int) -> None:
         if statement_to_check in self.special_python_function:
@@ -95,7 +96,6 @@ class PythonTypoFinder(BaseTypoFinder):
                 self.typos.append((word, line_number))
 
     def find_typos(self) -> FileTypo:
-        comments, names = self._scan_content()
-        self._check_comments_typo(comments)
-        self._check_statement_typo(names)
+        statements = self._scan_content()
+        self._check_statement_typo(statements)
         return FileTypo(self.file_name, self.typos)

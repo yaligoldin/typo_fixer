@@ -1,3 +1,6 @@
+"""
+get repository from cli
+"""
 import argparse
 
 

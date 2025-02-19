@@ -1,5 +1,7 @@
+"""
+file factory and ending enum
+"""
 from typing import Dict, Callable, Optional, List
-
 from enum import Enum
 
 from typo_fixer.file import File

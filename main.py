@@ -1,3 +1,6 @@
+"""
+main
+"""
 from typo_fixer.cli_manager import get_repository_from_cli
 from typo_fixer.file_factory import FileFactory
 from typo_fixer.file_fetcher import FileFetcher, APIError
