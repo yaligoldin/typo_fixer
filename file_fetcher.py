@@ -34,7 +34,7 @@ class FileFetcher:
         self.repository_path: str = repository_path
         self.git_path: str = git_path
 
-    def _get_file_content(self, project_path: str, file_path: str) -> str:
+    def _get_content(self, project_path: str, file_path: str) -> str:
         file_path_coded = file_path.replace('/', self.ENCODED_SLASH)
         url = f"{self.git_path}/{self.PROJECTS}/{project_path}/{self.REPOSITORY}/{self.FILES}/{file_path_coded}/" \
               f"{self.RAW}"
@@ -47,7 +47,7 @@ class FileFetcher:
         files: List[File] = []
         for file in response:
             if file[self.MODE] == self.FILE_TYPE:
-                file_content = self._get_file_content(project_path, file[self.PATH])
+                file_content = self._get_content(project_path, file[self.PATH])
                 files.append(File(file[self.NAME], file_content))
         return files
 
