@@ -6,7 +6,7 @@ import requests
 from typo_fixer.file import File
 
 
-class InvalidRepoName(Exception):
+class InvalidRepoPath(Exception):
     pass
 
 
@@ -54,7 +54,7 @@ class FileFetcher:
     def fetch_files(self) -> Optional[List[File]]:
         try:
             project_path = self._parse_repository_path()
-        except InvalidRepoName:
+        except InvalidRepoPath:
             print("invalid repo name")
             return
         url = f"{self.git_path}/{self.PROJECTS}/{project_path}/{self.REPOSITORY}/{self.TREE}?{self.RECURSIVE}"
@@ -68,4 +68,4 @@ class FileFetcher:
         parts = self.repository_path.split("/")
         if len(parts) >= 2:
             return self.ENCODED_SLASH.join(parts[self.TWO_LAST_PARTS:])
-        raise InvalidRepoName
+        raise InvalidRepoPath
