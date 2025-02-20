@@ -13,7 +13,7 @@ class TxtTypoFinder(BaseTypoFinder):
         self.file_content: str = file_content
 
     @staticmethod
-    def attract_typos_in_content(spell_checker: SpellChecker, content_lines: List[str]) -> List[Tuple[str, int]]:
+    def _attract_typos_in_content(spell_checker: SpellChecker, content_lines: List[str]) -> List[Tuple[str, int]]:
         typos: List[Tuple[str, int]] = []
         for line_number, line in enumerate(content_lines):
             words_in_line: List[str] = line.split(" ")
@@ -25,5 +25,5 @@ class TxtTypoFinder(BaseTypoFinder):
     def find_typos(self) -> FileTypo:
         spell_checker = SpellChecker()
         content_lines = self.file_content.splitlines()
-        typos: List[Tuple[str, int]] = (self.attract_typos_in_content(spell_checker, content_lines))
+        typos: List[Tuple[str, int]] = (self._attract_typos_in_content(spell_checker, content_lines))
         return FileTypo(self.file_name, typos)

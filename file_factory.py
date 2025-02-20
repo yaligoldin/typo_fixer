@@ -28,7 +28,7 @@ class FileFactory:
                                                                               FileType.TXT.value: TxtTypoFinder}
 
     @staticmethod
-    def _validate_file_type(file_parts: List[str]):
+    def _validate_file_type(file_parts: List[str]) -> FileType:
         try:
             file_type = file_parts[-1]
         except IndexError:

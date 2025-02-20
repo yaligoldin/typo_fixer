@@ -29,11 +29,11 @@ class PythonTypoFinder(BaseTypoFinder):
         self.split_ways = [self._split_dander, self._split_caml_case]
 
     @staticmethod
-    def _split_dander(statement_to_split: str):
+    def _split_dander(statement_to_split: str) -> List[str]:
         return statement_to_split.split("_")
 
     @staticmethod
-    def _split_caml_case(statement_to_split: str):
+    def _split_caml_case(statement_to_split: str) -> List[str]:
         return re.findall(r"[A-Z][a-z]*", statement_to_split)
 
     def is_docstring(self, last_token: str, token: tokenize.TokenInfo, quotation_sign: str) -> bool:
@@ -59,16 +59,16 @@ class PythonTypoFinder(BaseTypoFinder):
                 statements.add((token.string, token.start[self.LINE]))
         return statements
 
-    def _check_statement_typo(self, code_statements: Set[Tuple[str, int]]):
-        for statement in code_statements:
+    def _check_statement_typo(self, statements: Set[Tuple[str, int]]) -> None:
+        for statement in statements:
             self._check_statement(statement[self.CONTENT], statement[self.LINE_NUMBER])
 
-    def _split_statement_to_words(self, statement_to_check: str):
+    def _split_statement_to_words(self, statement_to_split: str) -> List[str]:
         for split_way in self.split_ways:
-            statement_words = split_way(statement_to_check)
+            statement_words = split_way(statement_to_split)
             if len(statement_words) > 1:
                 return statement_words
-        return statement_to_check.split(" ")
+        return statement_to_split.split(" ")
 
     def _check_statement(self, statement_to_check: str, line_number: int) -> None:
         if statement_to_check in self.special_python_function:
@@ -87,7 +87,7 @@ class PythonTypoFinder(BaseTypoFinder):
                 not_empty_words.append(word)
         return not_empty_words
 
-    def _check_typo_word(self, words: List[str], line_number: int):
+    def _check_typo_word(self, words: List[str], line_number: int) -> None:
         spell_checker = SpellChecker()
         spell_checker.word_frequency.load_words(dir(__builtins__))
         words = self._remove_empty_strings(words)
