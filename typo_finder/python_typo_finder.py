@@ -7,7 +7,7 @@ import string
 import tokenize
 from typing import List, Tuple, Set
 from spellchecker import SpellChecker
-from typo_fixer.typo_finder.base_typo_finder import BaseTypoFinder, FileTypo
+from typo_finder.base_typo_finder import BaseTypoFinder, FileTypo
 
 
 class PythonTypoFinder(BaseTypoFinder):

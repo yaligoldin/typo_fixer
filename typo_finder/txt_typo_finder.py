@@ -3,7 +3,7 @@ txt typo finder
 """
 from typing import Tuple, List
 from spellchecker import SpellChecker
-from typo_fixer.typo_finder.base_typo_finder import BaseTypoFinder, FileTypo
+from typo_finder.base_typo_finder import BaseTypoFinder, FileTypo
 
 
 class TxtTypoFinder(BaseTypoFinder):
