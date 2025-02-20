@@ -4,10 +4,10 @@ file factory and ending enum
 from typing import Dict, Callable, Optional, List
 from enum import Enum
 
-from typo_fixer.file import File
-from typo_fixer.typo_finder.base_typo_finder import BaseTypoFinder
-from typo_fixer.typo_finder.python_typo_finder import PythonTypoFinder
-from typo_fixer.typo_finder.txt_typo_finder import TxtTypoFinder
+from file import File
+from typo_finder.base_typo_finder import BaseTypoFinder
+from typo_finder.python_typo_finder import PythonTypoFinder
+from typo_finder.txt_typo_finder import TxtTypoFinder
 
 
 class FileType(Enum):
@@ -46,4 +46,4 @@ class FileFactory:
             file_type = self._get_file_type(file.file_name)
         except InValidFileNameError:
             return None
-        return self.file_factory[file_type](file.file_name, file.content)
+        return self.file_factory[file_type](file)

@@ -3,7 +3,7 @@ file fetcher
 """
 from typing import List, Dict, Optional
 import requests
-from typo_fixer.file import File
+from file import File
 
 
 class InvalidRepoPath(Exception):

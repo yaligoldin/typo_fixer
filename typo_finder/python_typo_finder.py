@@ -7,7 +7,9 @@ import string
 import tokenize
 from typing import List, Tuple, Set
 from spellchecker import SpellChecker
-from typo_fixer.typo_finder.base_typo_finder import BaseTypoFinder, FileTypo
+
+from file import File
+from typo_finder.base_typo_finder import BaseTypoFinder, FileTypo
 
 
 class PythonTypoFinder(BaseTypoFinder):
@@ -21,9 +23,8 @@ class PythonTypoFinder(BaseTypoFinder):
     CONTENT = 0
     COMMENT_SIGN = 1
 
-    def __init__(self, file_name: str, file_content: str):
-        self.file_name = file_name
-        self.file_content = file_content
+    def __init__(self, file: File):
+        self.file = file
         self.typos: List[Tuple[str, int]] = []
         self.special_python_function = ["__init__", "__str__", "__repr__", "__call__", "def"]
         self.split_ways = [self._split_dander, self._split_caml_case]
@@ -48,7 +49,7 @@ class PythonTypoFinder(BaseTypoFinder):
                                                                                          self.APOSTROPHE)
 
     def _scan_content(self) -> Set[Tuple[str, int]]:
-        tokens = tokenize.generate_tokens(io.StringIO(self.file_content).readline)
+        tokens = tokenize.generate_tokens(io.StringIO(self.file.content).readline)
         last_token = ""
         statements: Set[Tuple[str, int]] = set()
         for token in tokens:
@@ -98,4 +99,4 @@ class PythonTypoFinder(BaseTypoFinder):
     def find_typos(self) -> FileTypo:
         statements = self._scan_content()
         self._check_statement_typo(statements)
-        return FileTypo(self.file_name, self.typos)
+        return FileTypo(self.file.file_name, self.typos)

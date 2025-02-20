@@ -1,9 +1,9 @@
 """
 main
 """
-from typo_fixer.cli_manager import get_repository_from_cli
-from typo_fixer.file_factory import FileFactory
-from typo_fixer.file_fetcher import FileFetcher, APIError
+from cli_manager import get_repository_from_cli
+from file_factory import FileFactory
+from file_fetcher import FileFetcher, APIError
 
 GIT_PATH = "https://gitlab.com/api/v4"
 

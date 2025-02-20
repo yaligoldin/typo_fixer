@@ -3,14 +3,14 @@ txt typo finder
 """
 from typing import Tuple, List
 from spellchecker import SpellChecker
-from typo_fixer.typo_finder.base_typo_finder import BaseTypoFinder, FileTypo
+from file import File
+from typo_finder.base_typo_finder import BaseTypoFinder, FileTypo
 
 
 class TxtTypoFinder(BaseTypoFinder):
 
-    def __init__(self, file_name: str, file_content: str):
-        self.file_name: str = file_name
-        self.file_content: str = file_content
+    def __init__(self, file: File):
+        self.file: File = file
 
     @staticmethod
     def _attract_typos_in_content(spell_checker: SpellChecker, content_lines: List[str]) -> List[Tuple[str, int]]:
@@ -24,6 +24,6 @@ class TxtTypoFinder(BaseTypoFinder):
 
     def find_typos(self) -> FileTypo:
         spell_checker = SpellChecker()
-        content_lines = self.file_content.splitlines()
+        content_lines = self.file.content.splitlines()
         typos: List[Tuple[str, int]] = (self._attract_typos_in_content(spell_checker, content_lines))
-        return FileTypo(self.file_name, typos)
+        return FileTypo(self.file.file_name, typos)
