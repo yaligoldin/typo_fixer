@@ -4,7 +4,7 @@ txt typo finder
 from typing import Tuple, List
 from spellchecker import SpellChecker
 from file import File
-from typo_finder.base_typo_finder import BaseTypoFinder, FileTypo
+from base_typo_finder import BaseTypoFinder, FileTypo
 
 
 class TxtTypoFinder(BaseTypoFinder):
