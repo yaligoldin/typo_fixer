@@ -47,7 +47,7 @@ class PythonTypoFinder(BaseTypoFinder):
         return self.is_docstring(last_token, token, self.QUOTATION) or self.is_docstring(last_token, token,
                                                                                          self.APOSTROPHE)
 
-    def _scan_content(self) -> Set[Tuple[str, int]]:
+    def get_statements(self) -> Set[Tuple[str, int]]:
         tokens = tokenize.generate_tokens(io.StringIO(self.file.content).readline)
         last_token = ""
         statements: Set[Tuple[str, int]] = set()
@@ -62,7 +62,7 @@ class PythonTypoFinder(BaseTypoFinder):
     def _check_statements_typo(self, statements: Set[Tuple[str, int]]) -> None:
         for statement in statements:
             if statement[self.CONTENT] in self.special_python_function:
-                return
+                continue
             statements_words = self._split_statement_to_words(statement[self.CONTENT])
             self._check_typo_word(statements_words, statement[self.LINE_NUMBER])
 
@@ -93,6 +93,6 @@ class PythonTypoFinder(BaseTypoFinder):
                 self.typos.append(Typo(word, line_number))
 
     def find_typos(self) -> FileTypo:
-        statements = self._scan_content()
+        statements = self.get_statements()
         self._check_statements_typo(statements)
         return FileTypo(self.file, self.typos)
