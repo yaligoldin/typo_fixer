@@ -3,7 +3,7 @@ file fetcher
 """
 from typing import List, Dict, Optional
 import requests
-from file import File
+from typo_fixer.file import File
 
 
 class InvalidRepoPath(Exception):
@@ -48,7 +48,7 @@ class FileFetcher:
         for file in response:
             if file[self.MODE] == self.FILE_TYPE:
                 file_content = self._get_content_from_path(project_path, file[self.PATH])
-                files.append(File(file[self.NAME], file_content))
+                files.append(File(file[self.PATH], file_content))
         return files
 
     def fetch_files(self) -> Optional[List[File]]:

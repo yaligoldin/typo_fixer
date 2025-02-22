@@ -7,8 +7,8 @@ import string
 import tokenize
 from typing import List, Tuple, Set
 from spellchecker import SpellChecker
-from file import File
-from typo_finder.base_typo_finder import BaseTypoFinder, FileTypo
+from typo_fixer.file import File
+from typo_fixer.typo_finder.base_typo_finder import BaseTypoFinder, FileTypo, Typo
 
 
 class PythonTypoFinder(BaseTypoFinder):
@@ -24,7 +24,7 @@ class PythonTypoFinder(BaseTypoFinder):
 
     def __init__(self, file: File):
         self.file = file
-        self.typos: List[Tuple[str, int]] = []
+        self.typos: List[Typo] = []
         self.special_python_function = ["__init__", "__str__", "__repr__", "__call__", "def"]
         self.split_ways = [self._split_dander, self._split_caml_case]
 
@@ -59,9 +59,12 @@ class PythonTypoFinder(BaseTypoFinder):
                 statements.add((token.string, token.start[self.LINE]))
         return statements
 
-    def _check_statement_typo(self, statements: Set[Tuple[str, int]]) -> None:
+    def _check_statements_typo(self, statements: Set[Tuple[str, int]]) -> None:
         for statement in statements:
-            self._check_statement(statement[self.CONTENT], statement[self.LINE_NUMBER])
+            if statement[self.CONTENT] in self.special_python_function:
+                return
+            statements_words = self._split_statement_to_words(statement[self.CONTENT])
+            self._check_typo_word(statements_words, statement[self.LINE_NUMBER])
 
     def _split_statement_to_words(self, statement_to_split: str) -> List[str]:
         for split_way in self.split_ways:
@@ -69,12 +72,6 @@ class PythonTypoFinder(BaseTypoFinder):
             if len(statement_words) > 1:
                 return statement_words
         return statement_to_split.split(" ")
-
-    def _check_statement(self, statement_to_check: str, line_number: int) -> None:
-        if statement_to_check in self.special_python_function:
-            return
-        statements_words = self._split_statement_to_words(statement_to_check)
-        self._check_typo_word(statements_words, line_number)
 
     def _remove_empty_strings(self, words: List[str]) -> List[str]:
         not_empty_words: List[str] = []
@@ -93,9 +90,9 @@ class PythonTypoFinder(BaseTypoFinder):
         words = self._remove_empty_strings(words)
         for word in words:
             if word.lower() not in spell_checker:
-                self.typos.append((word, line_number))
+                self.typos.append(Typo(word, line_number))
 
     def find_typos(self) -> FileTypo:
         statements = self._scan_content()
-        self._check_statement_typo(statements)
-        return FileTypo(self.file.file_name, self.typos)
+        self._check_statements_typo(statements)
+        return FileTypo(self.file, self.typos)

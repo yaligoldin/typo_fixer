@@ -4,10 +4,10 @@ file factory and ending enum
 from typing import Dict, Callable, Optional, List
 from enum import Enum
 
-from file import File
-from typo_finder.base_typo_finder import BaseTypoFinder
-from typo_finder.python_typo_finder import PythonTypoFinder
-from typo_finder.txt_typo_finder import TxtTypoFinder
+from typo_fixer.file import File
+from typo_fixer.typo_finder.base_typo_finder import BaseTypoFinder
+from typo_fixer.typo_finder.python_typo_finder import PythonTypoFinder
+from typo_fixer.typo_finder.txt_typo_finder import TxtTypoFinder
 
 
 class FileType(Enum):
@@ -23,14 +23,15 @@ class InValidFileNameError(Exception):
 
 
 class FileFactory:
-    def __init__(self):
-        self.file_factory: Dict[str, Callable[[str, str], BaseTypoFinder]] = {FileType.PY.value: PythonTypoFinder,
-                                                                              FileType.TXT.value: TxtTypoFinder}
+    LAST = -1
 
-    @staticmethod
-    def _validate_file_type(file_parts: List[str]) -> FileType:
+    def __init__(self):
+        self.file_factory: Dict[str, Callable[[File], BaseTypoFinder]] = {FileType.PY.value: PythonTypoFinder,
+                                                                          FileType.TXT.value: TxtTypoFinder}
+
+    def _validate_file_type(self, file_parts: List[str]) -> str:
         try:
-            file_type = file_parts[-1]
+            file_type = file_parts[self.LAST]
         except IndexError:
             raise InValidFileNameError
         if file_type not in FILES_TYPES:
@@ -43,7 +44,7 @@ class FileFactory:
 
     def create_file_finder(self, file: File) -> Optional[BaseTypoFinder]:
         try:
-            file_type = self._get_file_type(file.file_name)
+            file_type = self._get_file_type(file.file_path)
         except InValidFileNameError:
             return None
         return self.file_factory[file_type](file)
